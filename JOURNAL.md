@@ -42,7 +42,7 @@ using the keyword set that's already defined, and catching TypeScript-only marke
 
 ## Week 8 — Reproduction & solution planning
 
-**Reproduction commit link:** see the commit that added this section (linked in the PR/branch history)
+**Reproduction commit link:** https://github.com/fortdominz/pathreview/commit/a9b035f333d381f2186e575deade3d49fe091ec5
 
 **Reproduction summary:**
 I reproduced it by running the extractor's unit tests on a clean checkout of my branch:
@@ -78,7 +78,7 @@ narrow to ever fire:
 - The class already defines a `JS_TS_KEYWORDS` set (`const`, `let`, `function`, `export`…)
   but nothing in the method uses it, so the most obvious content signal is ignored.
 
-**PLAN.md link:** [PLAN.md](PLAN.md)
+**PLAN.md link:** https://github.com/fortdominz/pathreview/blob/fix/148-skill-extractor-js-ts/PLAN.md
 
 **Walkthrough video (recommended):** _(not recorded)_
 
