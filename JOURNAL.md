@@ -88,3 +88,61 @@ positives on plain JavaScript. I also noticed a pre-existing wart: the Python ch
 `:\s*(int|str|float|bool|list|dict)` has no word boundary, so a TypeScript annotation like
 `: string` matches `str` and the sample gets tagged as Python. That's outside this issue,
 so I don't plan to fix it, but I want to make sure my change doesn't make it worse.
+
+---
+
+## Week 9 — Solution building & PR submission
+
+### Check-in 1 (mid-week)
+
+**Current progress:**
+Implemented the fix for #148. I rewrote the JavaScript/TypeScript branch in
+`_detect_languages()` (`ingestion/parsers/skill_extractor.py`) so it detects from code
+*content* instead of almost never firing: I broadened the import check to match
+`require('fs')` and `import … from`, added ES `export` / arrow-function / `console.log`
+signals, wired in the previously-unused `JS_TS_KEYWORDS` set (requiring 2+ hits to avoid
+false positives), and added TypeScript-specific markers (interface / type / enum /
+implements, type annotations, generics) that win the label since TypeScript is a superset
+of JavaScript. PLAN.md sub-tasks 1–3 are done.
+
+**Next steps:**
+Finish the regression tests (sub-task 4), run the full quality gate (sub-task 5), open the
+PR, and document the repo's pre-existing failures.
+
+**Blockers:**
+The repo ships with heavy pre-existing failures (182 ruff, 103 mypy, 53 failing unit tests
+on a clean checkout), and the pre-commit hook type-checks `tests/` even though the
+project's own `make check` does not — so it trips on ~20 pre-existing un-annotated test
+functions. Not a blocker to the fix itself; I'm handling it by documenting the pre-existing
+state and confirming my change adds no new failures.
+
+---
+
+### Check-in 2 (end of week)
+
+**PR link:** _(to be filled in when the PR is opened)_
+
+**Branch:** `fix/148-skill-extractor-js-ts`
+
+**What you built:**
+Content-based JavaScript and TypeScript detection in the skill extractor. The old JS/TS
+branch could almost never fire — its `require` check needed trailing whitespace,
+TypeScript was chosen only by filename, and the `JS_TS_KEYWORDS` set was unused. My fix
+detects both languages from real code signals, and TypeScript wins the label when
+TS-specific markers are present.
+
+**Tests added or updated:**
+`tests/unit/test_skill_extractor.py` — the two issue tests (`test_javascript_detection`,
+`test_text_with_typescript_files`) now pass, and I added five regression tests: CommonJS
+`require()`, ES-module `import … from`, TypeScript detected from content with no filename,
+TypeScript by `.ts` extension, and plain JavaScript is not mislabelled as TypeScript.
+
+**Self-review confirmation:** [x] make check passes  [x] make test-unit passes
+Interpreted per the module guidance for a repo with documented pre-existing failures —
+"passes" means my change introduces **no new failures**. Baseline on a clean checkout:
+**182 ruff / 103 mypy / 53 failing unit tests**. After my change: identical pre-existing
+counts, **zero new ruff/mypy errors in the source files I touched** (verified by stashing
+my changes and re-running), and failing unit tests dropped from **53 → 51** — I fixed 2 and
+added 5 passing tests. Full detail is in the PR description.
+
+**Draft PR feedback received from:** none (solo; open to Slack review before the deadline)
