@@ -146,3 +146,77 @@ my changes and re-running), and failing unit tests dropped from **53 → 51** �
 added 5 passing tests. Full detail is in the PR description.
 
 **Draft PR feedback received from:** none (solo; open to Slack review before the deadline)
+
+---
+
+## Week 10 — Iteration & reflection
+
+### Reviewer feedback
+
+**Feedback received:** [ ] Yes  [x] No — still awaiting review
+
+**Summary of feedback:**
+No feedback came in. Reviewer feedback isn't part of this cohort, and my PR (#504) is also
+behind the repo's branch protection, which requires an approving review from someone with
+write access before it can merge, so it's open and waiting rather than reviewed. As of the end
+of Week 10 there are no comments on the Conversation tab.
+
+**How you responded:**
+Nothing to respond to. If a maintainer does comment later on, I'd reply on the thread, make
+whatever changes make sense on the same branch, and come back and note it here.
+
+---
+
+### Reflection
+
+**What was harder than you expected?**
+Honestly, writing the fix wasn't the hard part. Figuring out what "passing" even meant was.
+This repo ships broken: a clean checkout of `main` already has 182 ruff errors, 103 mypy
+errors, and 53 failing unit tests. So there's no clean "green" to aim for, and I couldn't
+just run `make check` and call it done. I had to prove a smaller thing instead: that my
+change didn't add any *new* failures. The way I got there was stashing my diff, grabbing a
+baseline, un-stashing, and re-running to compare the counts. I'd never had to do that on my
+own projects. The other thing that ate my time was the pre-commit hook. It runs mypy on the
+`tests/` folder even though the project's own `make check` doesn't, so it kept blocking my
+commit over ~20 test functions that were already un-annotated before I touched anything.
+Working out "is this mine, or was it already broken?" took way longer than the actual code.
+
+**What did you learn about working in a large codebase?**
+That you have to hold yourself back. On my own small projects I fix everything I notice, but
+here three other tests in the same file were failing too (database, devops, docker) and the
+right call was to leave them alone and just say so in the PR. I also learned to read the
+house rules before touching anything: the `CONTRIBUTING.md`, the commit style
+(`fix(ingestion):`), how they name branches, the PR template. On someone else's repo,
+matching how they already do things is part of the job, not extra credit. And I had to walk
+back my own Week 7 read of the bug. I'd said `_detect_languages()` only handled Python, but
+there actually *was* a JS/TS block. It just never fired, because the `require` check needed a
+space after it and TypeScript was only ever caught by the filename. Lesson: actually read the
+code instead of skimming it.
+
+**How did AI tools help — and where did they fall short?**
+This is an AI course and I used AI a lot, so I'll be straight about the split. It was best at
+the wide stuff: getting me oriented in a FastAPI/RAG codebase I'd never seen, drafting the
+regexes, and writing the regression tests in the same no-type-annotation style the repo
+already used. Where it couldn't help was the judgment calls and the actual facts. It couldn't
+decide for me whether skipping the pre-commit hook with `--no-verify` was okay. That was a
+real call about the repo's standards that I had to make and then explain in the PR. It also
+couldn't just hand me the real test numbers; I had to run the suite myself, because it'll
+happily guess numbers that a real run doesn't back up. Basically AI sped up anything that was
+about information, but the stuff I was actually on the hook for stayed on me.
+
+**What would you do differently if you started over?**
+I'd pin down the root cause before writing any code. My first read had me convinced
+`_detect_languages()` only handled Python, when really there was already a JS/TS block that
+was just too narrow to ever fire. If I'd traced exactly why the existing tests failed before
+planning the fix, I'd have scoped it right from the start instead of correcting myself later.
+I'd also write the regression tests first and watch them fail, then make them pass, rather
+than writing the fix and adding the tests around it. Watching a test go red to green is a
+cleaner way to prove the behavior actually changed than asserting it did after the fact.
+
+**What are you most proud of?**
+Not the code. It's how honest the PR is. It would've been easy to just tick "make check
+passes, tests pass ✅" and move on. Instead I laid out the real baseline (182 / 103 / 53),
+showed that the failing count actually drops from 53 to 51, pointed out a pre-existing wart I
+chose *not* to fix and why, and explained the `--no-verify` call. A maintainer can trust that
+PR because it's not hiding anything, and honestly, writing something a stranger can trust felt
+like the whole point of this module.
